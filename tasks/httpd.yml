@@ -1,0 +1,67 @@
+---
+
+ - name: HTTPD - Install
+   yum:
+     name: "{{ packages }}"
+     state: latest
+     update_cache: yes
+   vars:
+     packages:
+       - httpd
+       - mod_ssl
+
+ - name: HTTPD - Make site's root dir
+   file:
+     path: /var/www/{{ site_name }}
+     mode: 0755
+     owner: root
+     group: root
+     state: directory
+
+ - name: HTTPD - Copy .htaccess file
+   copy:
+     src: ../files/htaccess
+     dest: /var/www/{{ site_name }}/.htaccess
+     owner: root
+     group: root
+     mode: 0644
+
+ - name: HTTPD - Make cert's dir
+   file:
+     path: /etc/httpd/ssl/{{ site_name }}
+     mode: 0755
+     owner: root
+     group: root
+     state: directory
+
+ - name: HTTPD - Copy certs
+   copy:
+     src: ../files/certs/{{ site_name }}
+     dest: /etc/httpd/ssl
+     owner: root
+     group: root
+     mode: 0644
+
+ - name: HTTPD - Generate vhost conf file
+   template:
+     src: ../templates/vhost.j2
+     dest: /etc/httpd/conf.d/{{ site_name }}.conf
+     owner: root
+     group: root
+     mode: 0644
+   notify:
+     - httpd_restart
+
+ - name: HTTPD - Copy logrotate config
+   copy:
+     src: ../files/logrotate_httpd
+     dest: /etc/logrotate.d/httpd
+     owner: root
+     group: root
+     mode: 0644
+
+ - name: HTTDP - Enable service httpd
+   systemd:
+     name: httpd
+     enabled: yes
+     masked: no
