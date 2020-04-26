@@ -4,3 +4,4 @@
 site_name:      company.com
 site_alias1:    company.org
 zabbix_server:  zabbix.company.com
+admin_hosts:    ip,ip,ip

@@ -1,0 +1,128 @@
+---
+
+ - name: Stop firewalld
+   systemd:
+     name: firewalld
+     enabled: no
+     state: stopped
+   ignore_errors: true
+
+ - name: Uninstall firewalld
+   yum:
+     name: firewalld
+     state: absent
+   ignore_errors: true
+
+ - name: Install iptables-services
+   yum:
+     name: "{{ packages }}"
+     state: latest
+     update_cache: yes
+   vars:
+     packages:
+       - iptables-services
+
+ - name: Set the policy for the FORWARD chain to DROP
+   iptables:
+     chain: FORWARD
+     policy: DROP
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Set the policy for the INPUT chain to ACCEPT
+   iptables:
+     chain: INPUT
+     policy: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Flush existing firewall rules
+   iptables:
+     flush: true
+
+ - name: Firewall rule - allow lo
+   iptables:
+     chain: INPUT
+     in_interface: lo
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Allow related and established connections
+   iptables:
+     chain: INPUT
+     ctstate: ESTABLISHED,RELATED
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Firewall rule - allow ping
+   iptables:
+     chain: INPUT
+     protocol: icmp
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Firewall rule - allow port 22/SSH traffic
+   iptables:
+     chain: INPUT
+     source: {{ admin_hosts }}
+     destination_port: 22
+     protocol: tcp
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Firewall rule - allow port 10050/Zabbix traffic
+   iptables:
+     chain: INPUT
+     source: {{ zabbix_server }}
+     destination_port: 10050
+     protocol: tcp
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Firewall rule - allow port 80/HTTP traffic
+   iptables:
+     chain: INPUT
+     destination_port: 80
+     protocol: tcp
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Firewall rule - allow port 443/HTTPS traffic
+   iptables:
+     chain: INPUT
+     destination_port: 443
+     protocol: tcp
+     jump: ACCEPT
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Set the policy for the INPUT chain to DROP
+   iptables:
+     chain: INPUT
+     policy: DROP
+   notify:
+     - iptables_save
+     - iptables_restart
+
+ - name: Enable iptables-services
+   systemd:
+     name: iptables
+     enabled: yes
+     state: started
+
+
