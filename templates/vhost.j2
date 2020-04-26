@@ -1,0 +1,47 @@
+<VirtualHost *:80>
+        ServerName {{ site_name }}
+	ServerAlias {{ site_alias1 }}
+
+        ServerAdmin webmaster@{{ site_name }}
+        DocumentRoot /var/www/{{ site_name }}
+        <Directory "/var/www/{{ site_name }}/">
+                Options +FollowSymLinks
+                AllowOverride All
+                order allow,deny
+                allow from all
+                Include /var/www/{{ site_name }}/.htaccess
+        </Directory>
+
+        ErrorLog /var/log/httpd/{{ site_name }}.http.error.log
+        CustomLog /var/log/httpd/{{ site_name }}.http.access.log combined
+
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+
+        ServerName {{ site_name }}
+	ServerAlias {{ site_alias1 }}
+
+        ServerAdmin webmaster@{{ site_name }}
+        DocumentRoot /var/www/{{ site_name }}
+        <Directory "/var/www/{{ site_name }}/">
+                Options +FollowSymLinks
+                AllowOverride All
+                order allow,deny
+                allow from all
+                Include /var/www/{{ site_name }}/.htaccess
+        </Directory>
+
+        # SSL
+        SSLEngine on
+        SSLCertificateFile /etc/httpd/ssl/{{ site_name }}/{{ site_name }}.crt
+        SSLCertificateKeyFile /etc/httpd/ssl/{{ site_name }}/{{ site_name }}.key
+        SSLCACertificateFile /etc/httpd/ssl/{{ site_name }}/root.crt
+        SSLCertificateChainFile /etc/httpd/ssl/{{ site_name }}/sub_root.crt
+
+        ErrorLog /var/log/httpd/{{ site_name }}.https.error.log
+        CustomLog /var/log/httpd/{{ site_name }}.https.access.log combined
+
+</VirtualHost>
+</IfModule>
