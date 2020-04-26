@@ -1,0 +1,20 @@
+---
+
+ - name: Install common software
+   yum:
+     name: "{{ packages }}"
+     state: latest
+     update_cache: yes
+   vars:
+     packages:
+       - vim
+       - htop
+       - mc
+       - iptables-services
+       - epel-release
+
+ - name: Change timezone to Europe/Moscow
+   timezone:
+     name: Europe/Moscow
+
+
